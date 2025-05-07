@@ -1,5 +1,8 @@
 /* See LICENSE file for copyright and license details. */
 
+#define TERM "alacritty"
+#include <X11/XF86keysym.h>
+
 /* Helper macros for spawning commands */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 #define CMD(...)   { .v = (const char*[]){ __VA_ARGS__, NULL } }
@@ -9,7 +12,7 @@
 static const unsigned int borderpx       = 0;   /* border pixel of windows */
 static const int corner_radius           = 10;
 #else
-static const unsigned int borderpx       = 1;   /* border pixel of windows */
+static const unsigned int borderpx       = 2;   /* border pixel of windows */
 #endif // ROUNDED_CORNERS_PATCH
 #if BAR_BORDER_PATCH
 /* This allows the bar border size to be explicitly set separately from borderpx.
@@ -28,11 +31,12 @@ static const int scalepreview            = 4;        /* Tag preview scaling */
 static int nomodbuttons                  = 1;   /* allow client mouse button bindings that have no modifier */
 #endif // NO_MOD_BUTTONS_PATCH
 #if VANITYGAPS_PATCH
-static const unsigned int gappih         = 20;  /* horiz inner gap between windows */
-static const unsigned int gappiv         = 10;  /* vert inner gap between windows */
-static const unsigned int gappoh         = 10;  /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov         = 30;  /* vert outer gap between windows and screen edge */
-static const int smartgaps_fact          = 1;   /* gap factor when there is only one client; 0 = no gaps, 3 = 3x outer gaps */
+static const unsigned int gap = 5;
+static const unsigned int gappih = gap; /* horiz inner gap between windows */
+static const unsigned int gappiv = gap; /* vert inner gap between windows */
+static const unsigned int gappoh = gap; /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov = gap; /* vert outer gap between windows and screen edge */
+static const int smartgaps_fact          = 0;   /* gap factor when there is only one client; 0 = no gaps, 3 = 3x outer gaps */
 #endif // VANITYGAPS_PATCH
 #if AUTOSTART_PATCH
 static const char autostartblocksh[]     = "autostart_blocking.sh";
@@ -143,7 +147,7 @@ static const unsigned int maxhtab          = 200;  /* tab menu height */
 #endif // ALT_TAB_PATCH
 
 /* Indicators: see patch/bar_indicators.h for options */
-static int tagindicatortype              = INDICATOR_TOP_LEFT_SQUARE;
+static int tagindicatortype              = INDICATOR_TOP_BAR;
 static int tiledindicatortype            = INDICATOR_NONE;
 static int floatindicatortype            = INDICATOR_TOP_LEFT_SQUARE;
 #if FAKEFULLSCREEN_CLIENT_PATCH && !FAKEFULLSCREEN_PATCH
@@ -783,7 +787,7 @@ static const char *xkb_layouts[]  = {
 #endif // XKB_PATCH
 
 /* key definitions */
-#define MODKEY Mod1Mask
+#define MODKEY Mod4Mask
 #if COMBO_PATCH && SWAPTAGS_PATCH && TAGOTHERMONITOR_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
@@ -792,14 +796,14 @@ static const char *xkb_layouts[]  = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} }, \
 	{ MODKEY|Mod4Mask|ShiftMask,    KEY,      swaptags,       {.ui = 1 << TAG} }, \
 	{ MODKEY|Mod4Mask,              KEY,      tagnextmon,     {.ui = 1 << TAG} }, \
-	{ MODKEY|Mod4Mask|ControlMask,  KEY,      tagprevmon,     {.ui = 1 << TAG} },
+	{ MODKEY|Mod1Mask|ControlMask,  KEY,      tagprevmon,     {.ui = 1 << TAG} },
 #elif COMBO_PATCH && SWAPTAGS_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
 	{ MODKEY|ShiftMask,             KEY,      combotag,       {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} }, \
-	{ MODKEY|Mod4Mask|ShiftMask,    KEY,      swaptags,       {.ui = 1 << TAG} },
+	{ MODKEY|Mod1Mask|ShiftMask,    KEY,      swaptags,       {.ui = 1 << TAG} },
 #elif COMBO_PATCH && TAGOTHERMONITOR_PATCH
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      comboview,      {.ui = 1 << TAG} }, \
@@ -1010,6 +1014,32 @@ ResourcePref resources[] = {
 
 static const Key keys[] = {
 	/* modifier                     key            function                argument */
+	{MODKEY, XK_Return, spawn, SHCMD(TERM)},
+	{MODKEY, XK_space, spawn, SHCMD("rofi -show drun -show-icons")},
+	{MODKEY, XK_s, spawn, SHCMD("thorium-browser")},
+	{MODKEY, XK_w, spawn, SHCMD("code")},
+	{MODKEY, XK_d, spawn, SHCMD("obsidian")},
+	{MODKEY, XK_v, spawn, SHCMD("blueman-manager")},
+	{MODKEY, XK_c, spawn, SHCMD("pavucontrol")},
+	{MODKEY, XK_e, spawn, SHCMD("pcmanfm")},
+	// { MODKEY,                       XK_d,      spawn,          SHCMD(TERM " -e nvim")},
+	{MODKEY, XK_a, spawn, SHCMD(TERM " -e yazi")},
+	{MODKEY, XK_r, spawn, SHCMD(TERM " -e btop")},
+	{MODKEY, XK_Escape, spawn, SHCMD("rofi -modi \"clipboard:greenclip print\" -show clipboard -run-command \'{cmd}\'")},
+	{0, XK_Print, spawn, SHCMD("flameshot gui")},
+	{MODKEY, XK_i, spawn, SHCMD("gpick -p")},
+	{MODKEY, XK_Print, spawn, SHCMD("~/.config/rofi/applets/bin/screenshot.sh")},
+	{MODKEY, XK_F2, spawn, SHCMD("systemctl poweroff")},
+	{MODKEY, XK_F3, spawn, SHCMD("systemctl reboot")},
+	{MODKEY, XK_Delete, spawn, SHCMD("killall xinit")},
+	{MODKEY, XK_F4, spawn, SHCMD("systemctl suspend")},
+	{0, XF86XK_AudioRaiseVolume, spawn, SHCMD("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+ && kill -35 $(pidof dwmblocks)")},
+	{0, XF86XK_AudioLowerVolume, spawn, SHCMD("wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%- && kill -35 $(pidof dwmblocks)")},
+	{0, XF86XK_AudioMute, spawn, SHCMD("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle && kill -35 $(pidof dwmblocks)")},
+	{MODKEY, XF86XK_RFKill, spawn, SHCMD("wifi toggle")},
+	{0, XF86XK_MonBrightnessUp, spawn, SHCMD("light -A 5")},
+	{0, XF86XK_MonBrightnessDown, spawn, SHCMD("light -U 5")},
+	
 	#if KEYMODES_PATCH
 	{ MODKEY,                       XK_Escape,     setkeymode,             {.ui = COMMANDMODE} },
 	#endif // KEYMODES_PATCH
@@ -1115,7 +1145,7 @@ static const Key keys[] = {
 	#if INSETS_PATCH
 	{ MODKEY|ShiftMask|ControlMask, XK_a,          updateinset,            {.v = &default_inset } },
 	#endif // INSETS_PATCH
-	{ MODKEY,                       XK_Return,     zoom,                   {0} },
+	{ MODKEY|ShiftMask,                       XK_Return,     zoom,                   {0} },
 	#if VANITYGAPS_PATCH
 	{ MODKEY|Mod4Mask,              XK_u,          incrgaps,               {.i = +1 } },
 	{ MODKEY|Mod4Mask|ShiftMask,    XK_u,          incrgaps,               {.i = -1 } },
@@ -1167,7 +1197,7 @@ static const Key keys[] = {
 	{ MODKEY|ControlMask,           XK_z,          showhideclient,         {0} },
 	{ MODKEY|ControlMask,           XK_s,          unhideall,              {0} },
 	#endif // BAR_WINTITLEACTIONS_PATCH
-	{ MODKEY|ShiftMask,             XK_c,          killclient,             {0} },
+	{ MODKEY,             XK_q,          killclient,             {0} },
 	#if KILLUNSEL_PATCH
 	{ MODKEY|ShiftMask,             XK_x,          killunsel,              {0} },
 	#endif // KILLUNSEL_PATCH
@@ -1188,10 +1218,10 @@ static const Key keys[] = {
 	{ MODKEY,                       XK_o,          winview,                {0} },
 	#endif // WINVIEW_PATCH
 	#if XRDB_PATCH || XRESOURCES_PATCH
-	{ MODKEY|ShiftMask,             XK_F5,         xrdb,                   {.v = NULL } },
+	{ MODKEY|ShiftMask,             XK_r,         xrdb,                   {.v = NULL } },
 	#endif // XRDB_PATCH | XRESOURCES_PATCH
 	{ MODKEY,                       XK_t,          setlayout,              {.v = &layouts[0]} },
-	{ MODKEY,                       XK_f,          setlayout,              {.v = &layouts[1]} },
+	{ MODKEY,                       XK_y,          setlayout,              {.v = &layouts[1]} },
 	{ MODKEY,                       XK_m,          setlayout,              {.v = &layouts[2]} },
 	#if COLUMNS_LAYOUT
 	{ MODKEY,                       XK_c,          setlayout,              {.v = &layouts[3]} },
@@ -1207,7 +1237,7 @@ static const Key keys[] = {
 	{ MODKEY|Mod5Mask|Mod1Mask,     XK_Tab,        rotatelayoutaxis,       {.i = -4 } },   /* flextile, 4 = secondary stack axis */
 	{ MODKEY|ControlMask,           XK_Return,     mirrorlayout,           {0} },          /* flextile, flip master and stack areas */
 	#endif // FLEXTILE_DELUXE_LAYOUT
-	{ MODKEY,                       XK_space,      setlayout,              {0} },
+	// { MODKEY,                       XK_space,      setlayout,              {0} },
 	{ MODKEY|ShiftMask,             XK_space,      togglefloating,         {0} },
 	#if MAXIMIZE_PATCH
 	{ MODKEY|ControlMask|ShiftMask, XK_h,          togglehorizontalmax,    {0} },
@@ -1233,13 +1263,13 @@ static const Key keys[] = {
 	{ MODKEY|ShiftMask,             XK_t,          unfloatvisible,         {.v = &layouts[0]} },
 	#endif // UNFLOATVISIBLE_PATCH
 	#if TOGGLEFULLSCREEN_PATCH
-	{ MODKEY,                       XK_y,          togglefullscreen,       {0} },
-	#endif // TOGGLEFULLSCREEN_PATCH
+	{ MODKEY,                       XK_f,          togglefullscreen,       {0} },
+	#endif // TOGGLEFULLSCREEN_PATCYH
 	#if !FAKEFULLSCREEN_PATCH && FAKEFULLSCREEN_CLIENT_PATCH
 	{ MODKEY|ShiftMask,             XK_y,          togglefakefullscreen,   {0} },
 	#endif // FAKEFULLSCREEN_CLIENT_PATCH
 	#if FULLSCREEN_PATCH
-	{ MODKEY|ShiftMask,             XK_f,          fullscreen,             {0} },
+	{ MODKEY,             XK_f,          fullscreen,             {0} },
 	#endif // FULLSCREEN_PATCH
 	#if STICKY_PATCH
 	{ MODKEY|ShiftMask,             XK_s,          togglesticky,           {0} },
